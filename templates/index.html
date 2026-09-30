@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriShield | Climate Advisory System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <header class="sidebar-header">
+                    <h2 class="serif-title"><i class="fa-solid fa-map-location-dot"></i> Configure Advisory</h2>
+                </header>
+                
+                <div class="input-group">
+                    <label>STATE / REGION</label>
+                    <select id="stateSelect" class="styled-select">
+                        <option value="">Select State</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>CROP</label>
+                    <select id="cropSelect" class="styled-select">
+                        <option value="">Select Crop</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>SEASON</label>
+                    <select id="seasonSelect" class="styled-select">
+                        <option value="">Select Season</option>
+                    </select>
+                </div>
+
+                <hr class="sidebar-divider">
+
+                <header class="sidebar-header">
+                    <h2 class="serif-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Current Climate Inputs</h2>
+                    <p class="sidebar-subtitle">Adjust today's field conditions</p>
+                </header>
+
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label>TEMPERATURE</label>
+                        <span class="slider-value"><span id="tempVal">25.0</span> °C</span>
+                    </div>
+                    <input type="range" id="tempSlider" min="0" max="50" step="0.1" value="25">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label>RAINFALL</label>
+                        <span class="slider-value"><span id="rainVal">1200</span> mm</span>
+                    </div>
+                    <input type="range" id="rainSlider" min="0" max="3000" step="10" value="1200">
+                </div>
+
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label>HUMIDITY</label>
+                        <span class="slider-value"><span id="humVal">65</span> %</span>
+                    </div>
+                    <input type="range" id="humSlider" min="0" max="100" step="1" value="65">
+                </div>
+
+                <button id="generateBtn" class="generate-btn">
+                    <i class="fa-solid fa-sync"></i> Refresh Advisory
+                </button>
+            </aside>
+
+            <!-- Dashboard Content -->
+            <main class="dashboard">
+                <!-- Status Banner -->
+                <div id="statusBanner" class="status-banner">
+                    <div class="banner-icon"><i class="fa-solid fa-circle-check"></i></div>
+                    <p id="summaryText">Please configure your location to begin.</p>
+                </div>
+
+                <!-- Tab Navigation -->
+                <nav class="dashboard-tabs">
+                    <button class="tab-btn active" data-tab="tab-pulse">
+                        <i class="fa-solid fa-bolt"></i> Climate Pulse
+                    </button>
+                    <button class="tab-btn" data-tab="tab-advisory">
+                        <i class="fa-solid fa-comment-medical"></i> Smart Advisory
+                    </button>
+                    <button class="tab-btn" data-tab="tab-resources">
+                        <i class="fa-solid fa-chart-pie"></i> Resource Insights
+                    </button>
+                </nav>
+
+                <div class="tab-container">
+                    <!-- PAGE 1: CLIMATE PULSE -->
+                    <div id="tab-pulse" class="tab-content active">
+
+                        <!-- Live Alerts Banner -->
+                        <div id="liveAlertsPanel" class="status-banner info hidden" style="margin-bottom: 15px;">
+                            <div class="banner-icon" style="background: #0288d1;"><i class="fa-solid fa-tower-broadcast"></i></div>
+                            <div class="alert-content">
+                                <strong>Live Climate Alert:</strong> <span id="liveAlertText">Monitoring real-time atmospheric changes...</span>
+                            </div>
+                        </div>
+
+                <!-- Quick Stats Row -->
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <span class="stat-label">RECORDS</span>
+                        <span class="stat-value" id="statRecords">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">CROPS</span>
+                        <span class="stat-value" id="statCrops">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">STATES</span>
+                        <span class="stat-value" id="statStates">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">YEARS DATA</span>
+                        <span class="stat-value" id="recordCount">0</span>
+                    </div>
+                </div>
+
+                <!-- Benchmarks -->
+                <section class="dashboard-section no-border">
+                    <div class="section-header-row">
+                        <h3><i class="fa-solid fa-chart-column"></i> Historical Benchmark vs Current</h3>
+                        <span class="tag">Based on dataset records</span>
+                    </div>
+                    <div class="benchmark-grid">
+                        <div class="bench-card">
+                            <span class="bench-label">TEMPERATURE</span>
+                            <div class="bench-main">
+                                <span class="bench-value" id="currTemp">--</span><span class="bench-unit">°C</span>
+                            </div>
+                            <div class="bench-footer">Hist: <span id="histTemp">--</span>°C <span id="tempStatus" class="bench-status"></span></div>
+                        </div>
+                        <div class="bench-card">
+                            <span class="bench-label">RAINFALL</span>
+                            <div class="bench-main">
+                                <span class="bench-value" id="currRain">--</span><span class="bench-unit">mm</span>
+                            </div>
+                            <div class="bench-footer">Hist: <span id="histRain">--</span>mm <span id="rainStatus" class="bench-status"></span></div>
+                        </div>
+                        <div class="bench-card">
+                            <span class="bench-label">HUMIDITY</span>
+                            <div class="bench-main">
+                                <span class="bench-value" id="currHum">--</span><span class="bench-unit">%</span>
+                            </div>
+                            <div class="bench-footer">Hist: <span id="histHum">--</span>% <span id="humStatus" class="bench-status"></span></div>
+                        </div>
+                        <div class="bench-card">
+                            <span class="bench-label">PREDICTED YIELD</span>
+                            <div class="bench-main">
+                                <span class="bench-value" id="predYield">--</span>
+                            </div>
+                            <div class="bench-footer">Hist: <span id="histYield">--</span></div>
+                        </div>
+
+                        <div class="bench-card">
+                            <span class="bench-label">SOIL TYPE</span>
+                            <div class="bench-main">
+                                <span class="bench-value" id="soilType">--</span>
+                            </div>
+                            <div class="bench-footer">CO₂: <span id="co2Val">--</span> ppm | C: <span id="carbonVal">--</span></div>
+                        </div>
+                        <div class="bench-card">
+                            <span class="bench-label">ATMOSPHERE</span>
+                            <div class="bench-main">
+                                <span class="bench-value" id="h2oVapor">--</span><span class="bench-unit">% H2O</span>
+                            </div>
+                            <div class="bench-footer">N₂: <span id="n2Val">--</span>% | O₂: <span id="o2Val">--</span>%</div>
+                        </div>
+                    </div>
+                </section>
+
+
+
+
+                <!-- Middle Row: Score and Trend -->
+                <div class="dashboard-row">
+                    <section class="dashboard-section half-width green-theme">
+                        <h3><i class="fa-solid fa-shield-halved"></i> Resilience Score</h3>
+                        <div class="section-padding">
+                            <div class="resilience-container no-bg">
+                                <div class="score-circle-container">
+                                    <div class="score-circle">
+                                        <svg viewBox="0 0 100 100">
+                                            <circle class="bg" cx="50" cy="50" r="45"></circle>
+                                            <circle class="progress" cx="50" cy="50" r="45" id="scoreCircle"></circle>
+                                        </svg>
+                                        <div class="score-text">
+                                            <span id="scoreVal">--</span>
+                                            <span class="score-label">SCORE</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="score-breakdown white-text">
+                                    <div class="breakdown-item">
+                                        <div class="item-info"><span>Temperature</span> <span id="tempFitVal">0</span></div>
+                                        <div class="progress-bar"><div class="fill" id="tempFitBar"></div></div>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <div class="item-info"><span>Rainfall</span> <span id="rainFitVal">0</span></div>
+                                        <div class="progress-bar"><div class="fill" id="rainFitBar"></div></div>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <div class="item-info"><span>Humidity</span> <span id="humFitVal">0</span></div>
+                                        <div class="progress-bar"><div class="fill" id="humFitBar"></div></div>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <div class="item-info"><span>Nutrients</span> <span id="nutrientFitVal">0</span></div>
+                                        <div class="progress-bar"><div class="fill" id="nutrientFitBar"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="dashboard-section half-width">
+                        <h3><i class="fa-solid fa-chart-line"></i> Historical Yield Trend</h3>
+                        <div class="section-padding">
+                            <div class="trend-container">
+                                <svg class="trend-line-svg" id="trendSvg" viewBox="0 0 400 150">
+                                    <path d="M 50 120 L 150 115 L 250 105 L 350 100" fill="none" stroke="#2d5a3f" stroke-width="3" />
+                                    <circle cx="50" cy="120" r="4" fill="#2d5a3f" />
+                                    <circle cx="150" cy="115" r="4" fill="#2d5a3f" />
+                                    <circle cx="250" cy="105" r="4" fill="#2d5a3f" />
+                                    <circle cx="350" cy="100" r="4" fill="#2d5a3f" />
+                                    <text x="45" y="140" font-size="10">2016</text>
+                                    <text x="340" y="140" font-size="10">2019</text>
+                                </svg>
+                            </div>
+                        </div> <!-- End of section-padding of trend-container -->
+                    </section>
+                    </div> <!-- End of dashboard-row -->
+                </div> <!-- End of tab-pulse -->
+
+                <!-- PAGE 2: SMART ADVISORY -->
+
+                    <div id="tab-advisory" class="tab-content">
+                        <!-- Advisory -->
+                        <section class="dashboard-section dark-green-theme">
+                            <h3><i class="fa-solid fa-leaf"></i> Smart Farmer Advisory</h3>
+                            <div class="section-padding">
+                                <div class="advisory-content">
+                                    <div class="adv-group">
+                                        <h4>CLIMATE RISK ASSESSMENT</h4>
+                                        <p id="riskText">Please select options.</p>
+                                    </div>
+                                    <div class="adv-group">
+                                        <h4>IRRIGATION & WATER MANAGEMENT</h4>
+                                        <p id="irrigationText">Please select options.</p>
+                                    </div>
+                                    <div class="adv-group">
+                                        <h4>SOIL & NUTRIENT GUIDANCE</h4>
+                                        <p id="soilNutrientText">Please select options.</p>
+                                    </div>
+                                    <div class="adv-group">
+                                        <h4>RESILIENCE ACTIONS</h4>
+                                        <ul id="resilienceActionsList" class="resilience-list no-bullet">
+                                            <li>Please select options.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <div id="datasetIrrigationBanner" class="dataset-banner">
+                            <div class="banner-icon"><i class="fa-solid fa-faucet-drip"></i></div>
+                            <p>Dataset Irrigation Advisory: <span id="datasetIrrigationText">--</span></p>
+                        </div>
+                    </div>
+
+                    <!-- PAGE 3: RESOURCE INSIGHTS -->
+                    <div id="tab-resources" class="tab-content">
+                        <!-- Alternatives -->
+                        <section class="dashboard-section dark-green-theme">
+                            <h3><i class="fa-solid fa-ranking-star"></i> Alternative Crop Options for <span id="altLocation">--</span></h3>
+                            <div class="section-padding">
+                                <p id="inputGuidanceText" class="sidebar-subtitle" style="margin-bottom: 10px; color: #ddd;"></p>
+                                <table class="alternatives-table white-bg">
+                                    <thead>
+                                        <tr>
+                                            <th>CROP</th>
+                                            <th>AVG YIELD</th>
+                                            <th>SOIL</th>
+                                            <th>RAINFALL</th>
+                                            <th>NUTRIENT SUITABILITY</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="alternativesTableBody"></tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Bottom Metrics Row -->
+                        <div class="bottom-metrics-grid">
+                            <div class="mini-card">
+                                <span class="mini-label">Area</span>
+                                <div class="mini-value" id="areaValue">--</div>
+                                <span class="mini-sub">Dataset avg: <span id="histArea">--</span></span>
+                            </div>
+                            <div class="mini-card">
+                                <span class="mini-label">Production</span>
+                                <div class="mini-value" id="prodValue">--</div>
+                                <span class="mini-sub">Dataset avg: <span id="histProd">--</span></span>
+                            </div>
+                            <div class="mini-card">
+                                <span class="mini-label">Fertilizer</span>
+                                <div class="mini-value" id="fertValue">--</div>
+                                <span class="mini-sub">Dataset avg: <span id="histFert">--</span></span>
+                            </div>
+                            <div class="mini-card">
+                                <span class="mini-label">Pesticide</span>
+                                <div class="mini-value" id="pestValue">--</div>
+                                <span class="mini-sub">Dataset avg: <span id="histPest">--</span></span>
+                            </div>
+                        </div>
+                    </div> <!-- End of tab-resources -->
+                </div> <!-- End of tab-container -->
+
+            </main>
+        </div>
+    </div>
+
+    <div id="loader" class="loader-overlay hidden">
+        <div class="spinner"></div>
+        <p>Calculating Climate Resilience...</p>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
