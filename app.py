@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import pandas as pd
 import numpy as np
 import tensorflow as tf
@@ -9,10 +10,11 @@ from src.advisory_engine import generate_advisory
 
 app = Flask(__name__)
 
-# Try to load models and data
-DATA_PATH = 'farmer_advisory_dataset_final.csv'
-MODEL_PATH = 'models/weather_lstm_model.h5'
-SCALER_PATH = 'models/scaler.pkl'
+# Resolve runtime assets from this file so deployment working directories do not matter.
+BASE_DIR = Path(__file__).resolve().parent
+DATA_PATH = BASE_DIR / 'farmer_advisory_dataset_final.csv'
+MODEL_PATH = BASE_DIR / 'models' / 'weather_lstm_model.h5'
+SCALER_PATH = BASE_DIR / 'models' / 'scaler.pkl'
 
 df = None
 model = None
@@ -26,7 +28,7 @@ def load_assets():
         df_csv = pd.read_csv(DATA_PATH)
         
         # Load new AgriShield records if available
-        AGRI_JSON_PATH = 'data/agrishield_records.json'
+        AGRI_JSON_PATH = BASE_DIR / 'data' / 'agrishield_records.json'
         if os.path.exists(AGRI_JSON_PATH):
             import json
             with open(AGRI_JSON_PATH, 'r', encoding='utf-8') as f:
@@ -354,3 +356,4 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
